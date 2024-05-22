@@ -1,8 +1,8 @@
 {
-  "name": "icu_string_validator",
+  "name": "xliff_icu_validator",
   "version": "1.0.0",
-  "description": "Compiles icu strings to validate them",
-  "main": "formatJSValidator.js",
+  "description": "Takes xliff file and validate its content against various rules and icu formats",
+  "main": "validator.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
