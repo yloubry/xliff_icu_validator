@@ -2,7 +2,7 @@
 Tested with Node 19
 ```
 npm ci 
-node formatJSValidator.js {PATH_TO_XLIFF_FOLDER}
+node validator.js {PATH_TO_XLIFF_FOLDER}
 ```
 
 Example of output
