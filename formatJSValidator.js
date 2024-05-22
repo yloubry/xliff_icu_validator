@@ -40,8 +40,9 @@ function extractIdAndTarget(transUnit, targetLanguage) {
 
 function validateTarget(source, target, targetLanguage, id) {
     try {
-        const icupluralselect = /(?:plural|select)/g;
-        const hasPluralSelect = icupluralselect.test(source);
+        const icupluralselect = /(?:(plural|select),)/;
+        const hasPluralSelectSource = icupluralselect.test(source);
+        const hasPluralSelectTarget = icupluralselect.test(target);
         const param = /\$?{?{[a-zA-Z_-]+}}?/g;
         const source_params = [...source.matchAll(param)];
         const source_param_array = source_params.map(match => match[0]);
@@ -69,8 +70,8 @@ function validateTarget(source, target, targetLanguage, id) {
             }
         } else if (target_params.length > source_params.length) throw new Error(`Variable [${target_params.join(", ")}] not found in source`)
 
-        if (hasPluralSelect) {
-            if (!icupluralselect.test(target)) throw new Error(`Plural or Select argument found in source but is missing in target`)
+        if (hasPluralSelectSource) {
+            if (!hasPluralSelectTarget) throw new Error(`Plural or Select argument found in source but is missing in target`)
         }
 
         const mf = new MessageFormat(targetLanguage);
