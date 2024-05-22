@@ -88,8 +88,24 @@ function validateTarget(source, target, targetLanguage, id) {
 }
 
 function processDirectory(directoryPath) {
-    const files = fs.readdirSync(directoryPath);
-    for (const filename of files) {
+    let files
+    try {
+        files = fs.readdirSync(directoryPath);
+    } catch (error) {
+        console.error(`'${directoryPath}' doesn't exist or is not a valid folder`)
+        process.exit(1)
+    }
+    const desiredExtensions = ['.xlf', '.xliff'];
+    const filteredFiles = files.filter((file) => {
+        const ext = path.extname(file).toLowerCase();
+        return desiredExtensions.includes(ext);
+    });
+    if (!filteredFiles.length) {
+        if (directoryPath === "." || directoryPath === "./") console.warn(`Current directory doesn't contain any file with extension ${desiredExtensions}`)
+        else console.warn(`${directoryPath} doesn't contain any file with extension ${desiredExtensions}`)
+        process.exit(0)
+    }
+    for (const filename of filteredFiles) {
 
         if (filename.endsWith('.xliff') || filename.endsWith('.xlf')) {
             console.log(`Processing ${path.join(directoryPath, filename)}`)
