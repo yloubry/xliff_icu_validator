@@ -106,23 +106,20 @@ function processDirectory(directoryPath) {
         process.exit(0)
     }
     for (const filename of filteredFiles) {
-
-        if (filename.endsWith('.xliff') || filename.endsWith('.xlf')) {
-            console.log(`Processing ${path.join(directoryPath, filename)}`)
-            const fileContent = fs.readFileSync(path.join(directoryPath, filename), 'utf-8');
-            const parser = new XMLParser(options);
-            let jsonObj = parser.parse(fileContent);
-            const transUnits = jsonObj.xliff.file.body['trans-unit'];
-            const targetLanguage = jsonObj.xliff.file.PROPS_["@_target-language"]
-            for (const transUnit of transUnits) {
-                const result = extractIdAndTarget(transUnit, targetLanguage);
-                if (result) {
-                    const { source, target, id } = result;
-                    try {
-                        validateTarget(source, target, targetLanguage, id);
-                    } catch {
-                        // Do Nothing
-                    }
+        console.log(`Processing ${path.join(directoryPath, filename)}`)
+        const fileContent = fs.readFileSync(path.join(directoryPath, filename), 'utf-8');
+        const parser = new XMLParser(options);
+        let jsonObj = parser.parse(fileContent);
+        const transUnits = jsonObj.xliff.file.body['trans-unit'];
+        const targetLanguage = jsonObj.xliff.file.PROPS_["@_target-language"]
+        for (const transUnit of transUnits) {
+            const result = extractIdAndTarget(transUnit, targetLanguage);
+            if (result) {
+                const { source, target, id } = result;
+                try {
+                    validateTarget(source, target, targetLanguage, id);
+                } catch {
+                    // Do Nothing
                 }
             }
         }
