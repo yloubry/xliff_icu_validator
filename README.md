@@ -12,8 +12,9 @@ Double click on ICUValidation2.html and drop one of multiple xliff
 If you need to recreate the browser minified js for messageFormat library.
 For example, if there is a newer version of messageformat/core.
 ```
-Change the version of package 
+Change the version of package in package.json
 "@messageformat/core": "^3.3.0",
+Run the following:
 npm install
 npm run mf4b 
 ```
