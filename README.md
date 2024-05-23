@@ -5,7 +5,15 @@ npm ci
 node validator.js {PATH_TO_XLIFF_FOLDER}
 ```
 
-Example of output
+For browser
+
+```
+npm install -g browserify uglify-js
+npm run mf4b //This will create the browser minified js for messageFormat library, you only need to do this if you update the messageformat/core library to a newer version.
+```
+Double click on ICUValidation2.html and drop one of multiple xliff
+
+Example of output via node
 
 ```
 Processing ../validator/Studio_tasks 2.xlf
@@ -33,3 +41,8 @@ Variable [{Landscape}] missing in target
 
 Some error occured, see logs
 ```
+
+example of output via browser
+
+<img width="1676" alt="image" src="https://github.com/yloubry/xliff_icu_validator/assets/13892147/06550511-7245-4cd8-8303-dd7ad6954df8">
+
