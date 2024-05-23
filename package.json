@@ -4,6 +4,7 @@
   "description": "Takes xliff file and validate its content against various rules and icu formats",
   "main": "validator.js",
   "scripts": {
+    "mf4b": "browserify messageformat.js | uglifyjs > messageformat.min.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Yohan Loubry",
@@ -11,5 +12,9 @@
   "dependencies": {
     "@messageformat/core": "^3.3.0",
     "fast-xml-parser": "^4.4.0"
+  },
+  "devDependencies": {
+    "browserify": "^17.0.0",
+    "uglify-js": "^3.17.4"
   }
 }
