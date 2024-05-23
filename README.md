@@ -5,7 +5,22 @@ npm ci
 node validator.js {PATH_TO_XLIFF_FOLDER}
 ```
 
-Example of output
+For browser
+
+Double click on ICUValidation2.html and drop one or multiple xliff
+
+If you need to recreate the browser minified js for messageFormat library.
+For example, if there is a newer version of messageformat/core.
+- Change the version of package in package.json
+"@messageformat/core": "^3.3.0",
+- Run the following:
+```shell
+npm install
+npm run mf4b 
+```
+
+
+Example of output via node
 
 ```
 Processing ../validator/Studio_tasks 2.xlf
@@ -33,3 +48,8 @@ Variable [{Landscape}] missing in target
 
 Some error occured, see logs
 ```
+
+example of output via browser
+
+<img width="1676" alt="image" src="https://github.com/yloubry/xliff_icu_validator/assets/13892147/06550511-7245-4cd8-8303-dd7ad6954df8">
+
