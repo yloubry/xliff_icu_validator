@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICU String Validator</title>
+    <script src="./messageformat.min.js"></script>
+
+</head>
+
+<body>
+    <div id="drop-zone" style="border: 2px dashed #ccc; padding: 20px; margin: 20px;">
+        <p>Drag and drop .xliff or .xlf files here, or click to select files.</p>
+        <input type="file" id="fileInput" style="display: none;">
+    </div>
+    <div id="log"></div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const logDiv = document.getElementById('log');
+        const black = 'black';
+        const red = 'red';
+        const blue = 'blue';
+        const orange = 'orange';
+        const small = 'small';
+        const medium = 'medium';
+        const large = 'large';
+
+        dropZone.addEventListener('dragover', handleDragOver);
+        dropZone.addEventListener('drop', handleFileSelect);
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+        function handleDragOver(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'copy';
+        }
+
+        function handleFileSelect(event) {
+            event.stopPropagation();
+            event.preventDefault();
+
+            const files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
+            const fileArray = Array.from(files);
+
+            fileArray.forEach(file => {
+                if (file.name.endsWith('.xliff') || file.name.endsWith('.xlf')) {
+                    processFile(file);
+                } else {
+                    logMessage(`Error: Unsupported file format for ${file.name}`, red, medium);
+                }
+            });
+        }
+
+        function processFile(file) {
+            logMessage(file.name, black, large);
+            logMessage('-----------------------------------------------');
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const fileContent = event.target.result;
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(fileContent, 'text/xml');
+                const transUnits = xmlDoc.querySelectorAll('trans-unit');
+                const targetLanguage = xmlDoc.getElementsByTagName("file")[0].getAttribute("target-language");
+                transUnits.forEach(transUnit => {
+                    const source = transUnit.querySelector('source').textContent;
+                    const target = transUnit.querySelector('target').textContent;
+                    const id = transUnit.getAttribute('id');
+                    if (target.trim() === "" && source.trim() !== "") {
+                        logMessage(`Error validating stringID ${id} for the language ${targetLanguage}`, red, medium);
+                        logMessage(`ID: ${id}`, black)
+                        logMessage(`Source: ${source}`, blue)
+                        logMessage(`Target: ${target}`, blue)
+                        logMessage(`Source is not empty but target is empty`, red, medium)
+                        logMessage('-----------------------------------------------')
+                        error = true
+                        return
+                    } else if (target.trim() !== "" && source.trim() === "") {
+                        logMessage(`Error validating stringID ${id} for the language ${targetLanguage}`, red, medium);
+                        logMessage(`ID: ${id}`, black)
+                        logMessage(`Source: ${source}`, blue)
+                        logMessage(`Target: ${target}`, blue)
+                        logMessage(`Source is empty but target is not empty. This might be valid and can be ignored`, red, medium)
+                        logMessage('-----------------------------------------------')
+                        return
+                    } else if (source.trim() === "") return;
+                    validateTarget(source, target, targetLanguage, id, logMessage);
+                });
+            };
+            reader.readAsText(file);
+        }
+        /*
+        function validateTarget(source, target, targetLanguage, id) {
+            try {
+                const mf = new IntlMessageFormat(target, targetLanguage);
+                mf.format();
+            } catch (error) {
+                logMessage(`Error validating string ID ${id} for the language ${targetLanguage}: ${error.message}`);
+            }
+        }
+        */
+
+        function validateTarget(source, target, targetLanguage, id, logMessage) {
+            try {
+                const icupluralselect = /(?:(plural|select),)/;
+                const hasPluralSelectSource = icupluralselect.test(source);
+                const hasPluralSelectTarget = icupluralselect.test(target);
+                const param = /\$?{?{[a-zA-Z_-]+}}?/g;
+                const source_params = Array.from(source.matchAll(param), match => match[0]);
+                const target_params = Array.from(target.matchAll(param), match => match[0]);
+
+                if (source_params.length) {
+                    let missingParam = [];
+                    let extraParam = [];
+                    if (target_params.length > source_params.length) {
+                        for (const param of target_params) {
+                            if (!source_params.includes(param)) {
+                                extraParam.push(param);
+                            }
+                        }
+                        if (extraParam.length) {
+                            throw new Error(`Variable [${extraParam.join(", ")}] not found in source`);
+                        }
+                    } else {
+                        for (const param of source_params) {
+                            if (!target_params.includes(param)) {
+                                missingParam.push(param);
+                            }
+                        }
+                        if (missingParam.length) {
+                            throw new Error(`Variable [${missingParam.join(", ")}] missing in target`);
+                        }
+                    }
+                } else if (target_params.length > source_params.length) {
+                    throw new Error(`Variable [${target_params.join(", ")}] not found in source`);
+                }
+
+                if (hasPluralSelectSource && !hasPluralSelectTarget) {
+                    throw new Error(`Plural or Select argument found in source but is missing in target`);
+                }
+
+                const mf = new MessageFormat(targetLanguage);
+                mf.compile(target);
+
+            } catch (error2) {
+                logMessage(`Error validating stringID ${id} for the language ${targetLanguage}`, red, medium);
+                logMessage(`ID: ${id}`, black);
+                logMessage(`source: ${source}`, blue);
+                logMessage(`target: ${target}`, blue);
+                logMessage(error2.message, red, medium);
+                logMessage('-----------------------------------------------');
+            }
+        }
+        function logMessage(message, color = black, size = null) {
+            const log = document.createElement('div');
+            log.textContent = message;
+            log.style.color = color;
+
+            // Define font sizes
+            let fontSize;
+            switch (size) {
+                case 'small':
+                    fontSize = '14px';
+                    break;
+                case 'medium':
+                    fontSize = '20px';
+                    break;
+                case 'large':
+                    fontSize = '24px';
+                    break;
+                default:
+                    fontSize = '14px';
+            }
+
+            log.style.fontSize = fontSize;
+            logDiv.appendChild(log);
+        }
+
+    </script>
+</body>
+
+</html>
