@@ -7,11 +7,17 @@ node validator.js {PATH_TO_XLIFF_FOLDER}
 
 For browser
 
-```
-npm install -g browserify uglify-js
-npm run mf4b //This will create the browser minified js for messageFormat library, you only need to do this if you update the messageformat/core library to a newer version.
-```
 Double click on ICUValidation2.html and drop one of multiple xliff
+
+If you need to recreate the browser minified js for messageFormat library.
+For example, if there is a newer version of messageformat/core.
+```
+Change the version of package 
+"@messageformat/core": "^3.3.0",
+npm install
+npm run mf4b 
+```
+
 
 Example of output via node
 
