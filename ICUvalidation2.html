@@ -90,23 +90,13 @@
             };
             reader.readAsText(file);
         }
-        /*
-        function validateTarget(source, target, targetLanguage, id) {
-            try {
-                const mf = new IntlMessageFormat(target, targetLanguage);
-                mf.format();
-            } catch (error) {
-                logMessage(`Error validating string ID ${id} for the language ${targetLanguage}: ${error.message}`);
-            }
-        }
-        */
 
         function validateTarget(source, target, targetLanguage, id, logMessage) {
             try {
                 const icupluralselect = /(?:(plural|select),)/;
                 const hasPluralSelectSource = icupluralselect.test(source);
                 const hasPluralSelectTarget = icupluralselect.test(target);
-                const param = /\$?{?{[a-zA-Z_-]+}}?/g;
+                const param = /\$?{[a-zA-Z_-]+(,\s*[a-zA-Z_-]+)*}/g;
                 const source_params = Array.from(source.matchAll(param), match => match[0]);
                 const target_params = Array.from(target.matchAll(param), match => match[0]);
 
@@ -144,17 +134,35 @@
                 mf.compile(target);
 
             } catch (error2) {
+                let message = error2.message;
+                const parsedmessage = String(error2.message).replace(/[\r\n]+/g, '').trim()
+                const regex = /.*(\d+) col (\d+): ?(\d+)/;
+                const parsedError = regex.exec(parsedmessage);
+                let parsedTarget;
+                let innerHTML = false
+                if (parsedError) {
+                    innerHTML = true
+                    let columnNumber = parseInt(parsedError[2]);
+                    let errorPosition = columnNumber;
+                    // Split the target string at the error position
+                    let beforeError = target.slice(0, errorPosition-1);
+                    let afterError = target.slice(errorPosition-1);
+
+                    let errorElement = document.createElement('pre');
+                    message = `Error validating, please look at grey section and compare with source ->  ${beforeError}<span style="color: grey;">${afterError}</span>`;
+                }
                 logMessage(`Error validating stringID ${id} for the language ${targetLanguage}`, red, medium);
                 logMessage(`ID: ${id}`, black);
                 logMessage(`source: ${source}`, blue);
                 logMessage(`target: ${target}`, blue);
-                logMessage(error2.message, red, medium);
+                logMessage(message, red, medium, innerHTML);
                 logMessage('-----------------------------------------------');
             }
         }
-        function logMessage(message, color = black, size = null) {
+        function logMessage(message, color = black, size = null, withHTML = false) {
             const log = document.createElement('div');
-            log.textContent = message;
+            if (withHTML) log.innerHTML = message;
+            else log.textContent = message
             log.style.color = color;
 
             // Define font sizes
