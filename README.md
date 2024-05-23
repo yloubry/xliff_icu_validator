@@ -7,7 +7,7 @@ node validator.js {PATH_TO_XLIFF_FOLDER}
 
 For browser
 
-Double click on ICUValidation2.html and drop one of multiple xliff
+Double click on ICUValidation2.html and drop one or multiple xliff
 
 If you need to recreate the browser minified js for messageFormat library.
 For example, if there is a newer version of messageformat/core.
